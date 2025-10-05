@@ -1,6 +1,6 @@
 # 🤖 CSV Agent System
 
-Sistema avançado de agentes de IA para análise conversacional de dados CSV usando CrewAI, Gemini Flash 2.5, e Supabase.
+Sistemax avançado de agentes de IA para análise conversacional de dados CSV usando CrewAI, Gemini Flash 2.5, e Supabase.
 
 ![Python](https://img.shields.io/badge/python-3.9%2B-blue)
 ![CrewAI](https://img.shields.io/badge/CrewAI-0.80.0%2B-green)
