@@ -20,6 +20,7 @@ from ..config.settings import settings
 logger = logging.getLogger(__name__)
 warnings.filterwarnings('ignore')
 
+
 class AnalyzerAgent:
     """Agente especializado em análises estatísticas e descoberta de insights"""
 
@@ -68,10 +69,12 @@ class AnalyzerAgent:
 
             # Análises específicas baseadas no foco
             if analysis_focus == "correlation" or analysis_focus == "general":
-                results["correlation_analysis"] = self._deep_correlation_analysis(df)
+                results["correlation_analysis"] = self._deep_correlation_analysis(
+                    df)
 
             if analysis_focus == "outliers" or analysis_focus == "general":
-                results["outlier_detection"] = self._advanced_outlier_detection(df)
+                results["outlier_detection"] = self._advanced_outlier_detection(
+                    df)
 
             if analysis_focus == "trends" or analysis_focus == "general":
                 results["trend_analysis"] = self._analyze_trends(df)
@@ -83,7 +86,8 @@ class AnalyzerAgent:
             results["insights"] = self._generate_insights(results, df)
 
             # Gerar recomendações
-            results["recommendations"] = self._generate_recommendations(results, df)
+            results["recommendations"] = self._generate_recommendations(
+                results, df)
 
             # Testes estatísticos automáticos
             results["statistical_tests"] = self._perform_statistical_tests(df)
@@ -101,8 +105,10 @@ class AnalyzerAgent:
     def _get_dataset_overview(self, df: pd.DataFrame) -> Dict[str, Any]:
         """Visão geral básica do dataset"""
         numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
-        categorical_cols = df.select_dtypes(include=['object', 'category']).columns.tolist()
-        datetime_cols = df.select_dtypes(include=['datetime64']).columns.tolist()
+        categorical_cols = df.select_dtypes(
+            include=['object', 'category']).columns.tolist()
+        datetime_cols = df.select_dtypes(
+            include=['datetime64']).columns.tolist()
 
         return {
             "shape": df.shape,
@@ -209,12 +215,12 @@ class AnalyzerAgent:
             for i, col1 in enumerate(columns):
                 for j, col2 in enumerate(columns[i+1:], i+1):
                     # Correlação de Pearson
-                    pearson_corr, pearson_p = pearsonr(numeric_df[col1].dropna(), 
-                                                     numeric_df[col2].dropna())
+                    pearson_corr, pearson_p = pearsonr(numeric_df[col1].dropna(),
+                                                       numeric_df[col2].dropna())
 
                     # Correlação de Spearman
                     spearman_corr, spearman_p = spearmanr(numeric_df[col1].dropna(),
-                                                        numeric_df[col2].dropna())
+                                                          numeric_df[col2].dropna())
 
                     partial_correlations[f"{col1}_vs_{col2}"] = {
                         "pearson": {"correlation": float(pearson_corr), "p_value": float(pearson_p)},
@@ -224,7 +230,8 @@ class AnalyzerAgent:
             results["correlation_tests"] = partial_correlations
 
         except ImportError:
-            logger.warning("Scipy não disponível para testes de correlação avançados")
+            logger.warning(
+                "Scipy não disponível para testes de correlação avançados")
 
         return results
 
@@ -247,7 +254,8 @@ class AnalyzerAgent:
                 lower_bound = Q1 - 1.5 * IQR
                 upper_bound = Q3 + 1.5 * IQR
 
-                iqr_outliers = series[(series < lower_bound) | (series > upper_bound)]
+                iqr_outliers = series[(series < lower_bound)
+                                      | (series > upper_bound)]
 
                 # Método Z-Score
                 z_scores = np.abs(stats.zscore(series))
@@ -319,7 +327,8 @@ class AnalyzerAgent:
             if len(series) > 10:
                 # Teste de normalidade
                 try:
-                    shapiro_stat, shapiro_p = stats.shapiro(series.sample(min(5000, len(series))))
+                    shapiro_stat, shapiro_p = stats.shapiro(
+                        series.sample(min(5000, len(series))))
                     is_normal = shapiro_p > 0.05
                 except:
                     is_normal = None
@@ -340,7 +349,8 @@ class AnalyzerAgent:
 
     def _analyze_trends(self, df: pd.DataFrame) -> Dict[str, Any]:
         """Analisa tendências temporais se houver colunas de data"""
-        datetime_cols = df.select_dtypes(include=['datetime64']).columns.tolist()
+        datetime_cols = df.select_dtypes(
+            include=['datetime64']).columns.tolist()
         numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
 
         if not datetime_cols or not numeric_cols:
@@ -352,16 +362,20 @@ class AnalyzerAgent:
             for num_col in numeric_cols:
                 try:
                     # Preparar dados para análise temporal
-                    temp_df = df[[date_col, num_col]].dropna().sort_values(date_col)
+                    temp_df = df[[date_col, num_col]
+                                 ].dropna().sort_values(date_col)
 
                     if len(temp_df) > 10:
                         # Calcular tendência usando correlação com tempo
-                        temp_df['time_numeric'] = pd.to_numeric(temp_df[date_col])
-                        correlation = temp_df[num_col].corr(temp_df['time_numeric'])
+                        temp_df['time_numeric'] = pd.to_numeric(
+                            temp_df[date_col])
+                        correlation = temp_df[num_col].corr(
+                            temp_df['time_numeric'])
 
                         # Análise de sazonalidade básica
                         temp_df['month'] = temp_df[date_col].dt.month
-                        monthly_stats = temp_df.groupby('month')[num_col].agg(['mean', 'std']).round(2)
+                        monthly_stats = temp_df.groupby(
+                            'month')[num_col].agg(['mean', 'std']).round(2)
 
                         trends[f"{date_col}_vs_{num_col}"] = {
                             "trend_correlation": float(correlation),
@@ -373,7 +387,8 @@ class AnalyzerAgent:
                         }
 
                 except Exception as e:
-                    logger.warning(f"Erro na análise de tendência {date_col} vs {num_col}: {e}")
+                    logger.warning(
+                        f"Erro na análise de tendência {date_col} vs {num_col}: {e}")
 
         return trends
 
@@ -402,7 +417,8 @@ class AnalyzerAgent:
             optimal_k = k_range[0] if len(inertias) > 0 else 3
 
             # Clustering final
-            final_kmeans = KMeans(n_clusters=optimal_k, random_state=42, n_init=10)
+            final_kmeans = KMeans(n_clusters=optimal_k,
+                                  random_state=42, n_init=10)
             cluster_labels = final_kmeans.fit_predict(scaled_data)
 
             # Análise dos clusters
@@ -441,7 +457,8 @@ class AnalyzerAgent:
             if len(series) > 10:
                 try:
                     # Teste de Shapiro-Wilk
-                    shapiro_stat, shapiro_p = stats.shapiro(series.sample(min(5000, len(series))))
+                    shapiro_stat, shapiro_p = stats.shapiro(
+                        series.sample(min(5000, len(series))))
 
                     tests[f"normality_{col}"] = {
                         "test": "Shapiro-Wilk",
@@ -451,7 +468,8 @@ class AnalyzerAgent:
                         "interpretation": "Normal" if shapiro_p > 0.05 else "Não normal"
                     }
                 except Exception as e:
-                    logger.warning(f"Erro no teste de normalidade para {col}: {e}")
+                    logger.warning(
+                        f"Erro no teste de normalidade para {col}: {e}")
 
         return tests
 
@@ -478,7 +496,8 @@ class AnalyzerAgent:
                         high_outlier_cols.append(col)
 
             if high_outlier_cols:
-                insights.append(f"Colunas com alto percentual de outliers: {', '.join(high_outlier_cols[:3])}")
+                insights.append(
+                    f"Colunas com alto percentual de outliers: {', '.join(high_outlier_cols[:3])}")
 
         # Insights sobre distribuições
         if "distribution_analysis" in results:
@@ -489,12 +508,14 @@ class AnalyzerAgent:
                         non_normal_cols.append(col)
 
             if non_normal_cols:
-                insights.append(f"Variáveis com distribuição não-normal: {', '.join(non_normal_cols[:3])}")
+                insights.append(
+                    f"Variáveis com distribuição não-normal: {', '.join(non_normal_cols[:3])}")
 
         # Insights sobre clustering
         if "clustering_analysis" in results and "optimal_clusters" in results["clustering_analysis"]:
             n_clusters = results["clustering_analysis"]["optimal_clusters"]
-            insights.append(f"Dados podem ser organizados em {n_clusters} grupos distintos")
+            insights.append(
+                f"Dados podem ser organizados em {n_clusters} grupos distintos")
 
         # Insights sobre tendências
         if "trend_analysis" in results:
@@ -509,9 +530,11 @@ class AnalyzerAgent:
                         decreasing_trends.append(trend_name)
 
             if increasing_trends:
-                insights.append(f"Tendências crescentes identificadas em: {len(increasing_trends)} relações temporais")
+                insights.append(
+                    f"Tendências crescentes identificadas em: {len(increasing_trends)} relações temporais")
             if decreasing_trends:
-                insights.append(f"Tendências decrescentes identificadas em: {len(decreasing_trends)} relações temporais")
+                insights.append(
+                    f"Tendências decrescentes identificadas em: {len(decreasing_trends)} relações temporais")
 
         return insights
 
@@ -521,29 +544,35 @@ class AnalyzerAgent:
 
         # Recomendações sobre correlações
         if "correlation_analysis" in results:
-            strong_corrs = results["correlation_analysis"].get("strong_correlations", [])
+            strong_corrs = results["correlation_analysis"].get(
+                "strong_correlations", [])
             if len(strong_corrs) > 3:
-                recommendations.append("Explorar as correlações fortes para identificar relações causais")
+                recommendations.append(
+                    "Explorar as correlações fortes para identificar relações causais")
             elif len(strong_corrs) == 0:
-                recommendations.append("Investigar transformações de variáveis para encontrar relações não-lineares")
+                recommendations.append(
+                    "Investigar transformações de variáveis para encontrar relações não-lineares")
 
         # Recomendações sobre outliers
         if "outlier_detection" in results:
             for col, outlier_info in results["outlier_detection"].items():
                 if isinstance(outlier_info, dict) and "iqr_method" in outlier_info:
                     if outlier_info["iqr_method"]["outlier_percentage"] > 20:
-                        recommendations.append(f"Investigar e possivelmente tratar outliers na coluna {col}")
+                        recommendations.append(
+                            f"Investigar e possivelmente tratar outliers na coluna {col}")
 
         # Recomendações sobre normalidade
         if "distribution_analysis" in results:
             for col, dist_info in results["distribution_analysis"].items():
                 if isinstance(dist_info, dict) and "normality_test" in dist_info:
                     if not dist_info["normality_test"].get("is_normal", True):
-                        recommendations.append(f"Considerar transformações para normalizar a variável {col}")
+                        recommendations.append(
+                            f"Considerar transformações para normalizar a variável {col}")
 
         # Recomendações gerais
         if df.isnull().sum().sum() > 0:
-            recommendations.append("Implementar estratégia de tratamento para valores ausentes")
+            recommendations.append(
+                "Implementar estratégia de tratamento para valores ausentes")
 
         return recommendations
 
@@ -607,6 +636,41 @@ class AnalyzerAgent:
             return float(silhouette_score(data, labels))
         except:
             return 0.0
+# --- Nova função para detectar gráficos na pergunta ---
+
+
+def detect_plot_intent(query: str, df: pd.DataFrame):
+    plot_words = [
+        ("histograma", "histogram"),
+        ("dispersão", "scatter"),
+        ("gráfico", "histogram"),  # default para gráfico geral
+        ("correlação", "scatter")  # correlação geralmente é gráfico de dispersão
+    ]
+    for word, plot_type in plot_words:
+        if word in query.lower():
+            # Tentativa automática: pega a primeira coluna numérica encontrada
+            numeric_cols = df.select_dtypes(
+                include=[float, int]).columns.tolist()
+            if numeric_cols:
+                if plot_type == "histogram":
+                    return {
+                        "plot": True,
+                        "plot_type": plot_type,
+                        # usa a primeira como exemplo
+                        "column": numeric_cols[0],
+                        "x": numeric_cols[0],
+                        "y": None
+                    }
+                elif plot_type == "scatter" and len(numeric_cols) >= 2:
+                    return {
+                        "plot": True,
+                        "plot_type": plot_type,
+                        "x": numeric_cols[0],
+                        "y": numeric_cols[1],
+                        "column": None
+                    }
+            return {"plot": False}
+    return {"plot": False}
 
 
 def create_analyzer_agent() -> Agent:
