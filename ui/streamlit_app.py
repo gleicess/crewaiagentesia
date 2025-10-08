@@ -13,6 +13,9 @@ from typing import Dict, List, Any, Optional
 import uuid
 import time
 
+from agents.analyzer import AnalyzerAgent, detect_plot_intent
+
+
 # Configurar logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -400,6 +403,19 @@ def render_conversational_analysis(df: pd.DataFrame):
         )
 
     if analyze_button and user_question:
+    plot_intent = detect_plot_intent(user_question, df)
+    if plot_intent["plot"]:
+        import plotly.express as px
+        if plot_intent["plot_type"] == "histogram":
+            fig = px.histogram(df, x=plot_intent["column"][0])
+            st.plotly_chart(fig)
+        elif plot_intent["plot_type"] == "scatter":
+            x_col = plot_intent["x"][0]
+            y_col = plot_intent["y"][1] if len(
+                plot_intent["y"]) > 1 else plot_intent["y"][0]
+            fig = px.scatter(df, x=x_col, y=y_col)
+            st.plotly_chart(fig)
+    else:
         perform_analysis(user_question, df)
 
     # Mostrar resultados se existirem
